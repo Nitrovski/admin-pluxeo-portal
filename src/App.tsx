@@ -18,7 +18,7 @@ function ProtectedLayout() {
   const { impersonation, clearImpersonation, minutesLeft } = useImpersonationContext();
 
   useEffect(() => {
-    setTokenProvider((opts) => getToken(opts));
+    setTokenProvider(() => getToken());
   }, [getToken]);
 
   useEffect(() => {
