@@ -61,6 +61,34 @@ export interface Impersonation {
   targetMerchantId: string;
 }
 
+
+export interface KpiOverviewResponse {
+  totals: {
+    totalTenants: number;
+    activeSubscriptions: number;
+    totalCards: number;
+    newCards: number;
+    events: number;
+    stampsIssued: number;
+    rewardsDelta: number;
+    pointsEarned: number;
+    pointsRedeemed: number;
+    lastEventAt: string | null;
+  };
+}
+
+export interface KpiTimeseriesResponse {
+  series: {
+    byDay: Array<{
+      date: string;
+      newCards: number;
+      events: number;
+      stampsIssued: number;
+      rewardsDelta: number;
+    }>;
+  };
+}
+
 export interface ListTenantParams {
   query?: string;
   plan?: string;
@@ -158,6 +186,19 @@ export async function stopImpersonation(token: string): Promise<void> {
     method: 'POST',
     body: { token },
   });
+}
+
+
+export async function getKpiOverview(rangeDays = 30, signal?: AbortSignal): Promise<KpiOverviewResponse> {
+  const search = new URLSearchParams();
+  search.set('rangeDays', String(rangeDays));
+  return apiFetch<KpiOverviewResponse>(`/api/admin/kpis/overview?${search.toString()}`, { signal });
+}
+
+export async function getKpiTimeseries(rangeDays = 30, signal?: AbortSignal): Promise<KpiTimeseriesResponse> {
+  const search = new URLSearchParams();
+  search.set('rangeDays', String(rangeDays));
+  return apiFetch<KpiTimeseriesResponse>(`/api/admin/kpis/timeseries?${search.toString()}`, { signal });
 }
 
 export async function getActiveImpersonation(token: string): Promise<{

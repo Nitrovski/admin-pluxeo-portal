@@ -31,7 +31,8 @@ export function useImpersonation() {
           setImpersonationState(null);
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.warn('Failed to validate impersonation state', error);
         // Non-blocking best-effort validation. Keep local state when request fails.
       });
   }, []);

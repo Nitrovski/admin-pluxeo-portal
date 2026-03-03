@@ -1,7 +1,8 @@
 import { SignedIn, SignedOut, useAuth, useClerk } from '@clerk/clerk-react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { NavLink, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { AccessDeniedPage } from './pages/AccessDeniedPage';
+import { DashboardPage } from './pages/DashboardPage';
 import { SignInPage } from './pages/SignInPage';
 import { TenantsListPage } from './pages/TenantsListPage';
 import { TenantDetailPage } from './pages/TenantDetailPage';
@@ -16,10 +17,17 @@ function ProtectedLayout() {
   const [allowed, setAllowed] = useState(false);
   const [denied, setDenied] = useState(false);
   const { impersonation, clearImpersonation, minutesLeft } = useImpersonationContext();
+  const audience = (import.meta.env.VITE_ADMIN_CLERK_JWT_AUDIENCE as string | undefined)?.trim();
 
   useEffect(() => {
-    setTokenProvider(() => getToken());
-  }, [getToken]);
+    setTokenProvider(() => {
+      if (audience) {
+        const tokenOptions = ({ audience } as unknown) as Parameters<typeof getToken>[0];
+        return getToken(tokenOptions);
+      }
+      return getToken();
+    });
+  }, [audience, getToken]);
 
   useEffect(() => {
     let active = true;
@@ -62,6 +70,14 @@ function ProtectedLayout() {
     <div style={{ paddingTop }}>
       <ImpersonationBanner impersonation={impersonation} minutesLeft={minutesLeft} onClear={clearImpersonation} />
       <main className="container">
+        <nav className="top-nav">
+          <NavLink to="/dashboard" className={({ isActive }) => `top-nav-link${isActive ? ' active' : ''}`}>
+            Dashboard
+          </NavLink>
+          <NavLink to="/tenants" className={({ isActive }) => `top-nav-link${isActive ? ' active' : ''}`}>
+            Tenants
+          </NavLink>
+        </nav>
         <Outlet />
       </main>
     </div>
@@ -93,7 +109,8 @@ export default function App() {
         <Route path="/sign-in" element={<SignInPage />} />
         <Route element={<AuthBoundary />}>
           <Route element={<ProtectedLayout />}>
-            <Route path="/" element={<Navigate to="/tenants" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tenants" element={<TenantsListPage />} />
             <Route path="/tenants/:customerId" element={<TenantDetailRoute />} />
           </Route>

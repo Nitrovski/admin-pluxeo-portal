@@ -61,10 +61,6 @@ td {
   padding: 10px;
 }
 
-tbody tr {
-  cursor: pointer;
-}
-
 tbody tr:hover {
   background: #f9fafb;
 }
@@ -102,6 +98,55 @@ tbody tr:hover {
 
 .breadcrumb {
   margin-bottom: 12px;
+}
+
+
+.top-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.top-nav-link {
+  color: #111827;
+  text-decoration: none;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fff;
+}
+
+.top-nav-link.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.range-button {
+  background: #fff;
+  color: #111827;
+}
+
+.range-button.active {
+  background: #111827;
+  color: #fff;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.kpi-grid .card h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.kpi-grid .card p {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
 }
 
 .toast-container {
