@@ -46,8 +46,6 @@ export function DashboardPage() {
   const totals = data?.overview.totals;
   const byDay = data?.timeseries.series.byDay ?? [];
 
-  const totalsEvents = totals && typeof totals.events === 'object' && totals.events !== null ? totals.events : undefined;
-  const totalEventsCount = totals && typeof totals.events === 'number' ? totals.events : undefined;
 
   return (
     <div>
@@ -72,16 +70,16 @@ export function DashboardPage() {
 
       {totals && (
         <section className="kpi-grid" style={{ opacity: loading ? 0.7 : 1 }}>
-          <article className="card"><h3>Total tenants</h3><p>{formatNumber(totals.totalTenants)}</p></article>
-          <article className="card"><h3>Active subscriptions</h3><p>{formatNumber(totals.activeSubscriptions)}</p></article>
-          <article className="card"><h3>Total cards</h3><p>{formatNumber(totals.totalCards)}</p></article>
-          <article className="card"><h3>New cards (range)</h3><p>{formatNumber(totals.newCards)}</p></article>
-          <article className="card"><h3>Events (range)</h3><p>{formatNumber(totalEventsCount)}</p></article>
-          <article className="card"><h3>Stamps issued (range)</h3><p>{formatNumber(totalsEvents?.stampsIssued)}</p></article>
-          <article className="card"><h3>Rewards delta (range)</h3><p>{formatNumber(totalsEvents?.rewardsDelta)}</p></article>
-          <article className="card"><h3>Points earned (range)</h3><p>{formatNumber(totalsEvents?.pointsEarned)}</p></article>
-          <article className="card"><h3>Points redeemed (range)</h3><p>{formatNumber(totalsEvents?.pointsRedeemed)}</p></article>
-          <article className="card"><h3>Last event at</h3><p>{formatDateTime(totals.lastEventAt)}</p></article>
+          <article className="card"><h3>Total tenants</h3><p>{formatNumber(totals.tenants.total)}</p></article>
+          <article className="card"><h3>Active subscriptions</h3><p>{formatNumber(totals.tenants.activeSubscription)}</p></article>
+          <article className="card"><h3>Total cards</h3><p>{formatNumber(totals.cards.total)}</p></article>
+          <article className="card"><h3>New cards (range)</h3><p>{formatNumber(totals.cards.newInRange)}</p></article>
+          <article className="card"><h3>Events (range)</h3><p>{formatNumber(totals.events.totalInRange)}</p></article>
+          <article className="card"><h3>Stamps issued (range)</h3><p>{formatNumber(totals.events.stampsIssued)}</p></article>
+          <article className="card"><h3>Rewards delta (range)</h3><p>{formatNumber(totals.events.rewardsDelta)}</p></article>
+          <article className="card"><h3>Points earned (range)</h3><p>{formatNumber(totals.events.pointsEarned)}</p></article>
+          <article className="card"><h3>Points redeemed (range)</h3><p>{formatNumber(totals.events.pointsRedeemed)}</p></article>
+          <article className="card"><h3>Last event at</h3><p>{formatDateTime(totals.activity.lastEventAt)}</p></article>
         </section>
       )}
 
@@ -101,20 +99,15 @@ export function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {byDay.map((row) => {
-                const rowEvents = typeof row.events === 'object' && row.events !== null ? row.events : undefined;
-                const rowEventsCount = typeof row.events === 'number' ? row.events : undefined;
-
-                return (
-                  <tr key={row.date}>
-                    <td>{row.date}</td>
-                    <td>{formatNumber(row.newCards)}</td>
-                    <td>{formatNumber(rowEventsCount)}</td>
-                    <td>{formatNumber(rowEvents?.stampsIssued)}</td>
-                    <td>{formatNumber(rowEvents?.rewardsDelta)}</td>
-                  </tr>
-                );
-              })}
+              {byDay.map((row) => (
+                <tr key={row.date}>
+                  <td>{row.date}</td>
+                  <td>{formatNumber(row.newCards)}</td>
+                  <td>{formatNumber(row.events.totalInRange)}</td>
+                  <td>{formatNumber(row.events.stampsIssued)}</td>
+                  <td>{formatNumber(row.events.rewardsDelta)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
