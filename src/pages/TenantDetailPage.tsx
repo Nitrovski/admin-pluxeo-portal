@@ -3,9 +3,19 @@ import { Link, useParams } from 'react-router-dom';
 import { getTenant, startImpersonation, Tenant } from '../lib/adminApi';
 import { ImpersonationState } from '../lib/impersonation';
 import { useToast } from '../components/ToastProvider';
+import { formatNumber } from '../lib/formatNumber';
 
 interface Props {
   onSetImpersonation: (state: ImpersonationState) => void;
+}
+
+type MetricsObject = Partial<Record<'stampsIssued' | 'rewardsDelta' | 'pointsEarned' | 'pointsRedeemed', unknown>>;
+
+function readMetricValue(value: unknown, metricKey: keyof MetricsObject): unknown {
+  if (value && typeof value === 'object' && metricKey in value) {
+    return (value as MetricsObject)[metricKey];
+  }
+  return value;
 }
 
 export function TenantDetailPage({ onSetImpersonation }: Props) {
@@ -99,19 +109,19 @@ export function TenantDetailPage({ onSetImpersonation }: Props) {
 
       <section className="card">
         <h2>Metrics</h2>
-        <p>cardsCount: {tenant.cardsCount}</p>
-        <p>events7d: {tenant.events7d}</p>
-        <p>events30d: {tenant.events30d}</p>
+        <p>cardsCount: {formatNumber(tenant.cardsCount)}</p>
+        <p>events7d: {formatNumber(tenant.events7d)}</p>
+        <p>events30d: {formatNumber(tenant.events30d)}</p>
         <p>lastActivity: {tenant.lastActivity ? new Date(tenant.lastActivity).toLocaleString() : '—'}</p>
       </section>
 
       <section className="card">
         <h2>Last 30 Days Metrics</h2>
-        <p>New cards: {tenant.newCards30d}</p>
-        <p>Stamps issued: {tenant.stampsIssued30d}</p>
-        <p>Rewards delta: {tenant.rewardsDelta30d}</p>
-        <p>Points earned: {tenant.pointsEarned30d}</p>
-        <p>Points redeemed: {tenant.pointsRedeemed30d}</p>
+        <p>New cards: {formatNumber(tenant.newCards30d)}</p>
+        <p>Stamps issued: {formatNumber(readMetricValue(tenant.stampsIssued30d, 'stampsIssued'))}</p>
+        <p>Rewards delta: {formatNumber(readMetricValue(tenant.rewardsDelta30d, 'rewardsDelta'))}</p>
+        <p>Points earned: {formatNumber(readMetricValue(tenant.pointsEarned30d, 'pointsEarned'))}</p>
+        <p>Points redeemed: {formatNumber(readMetricValue(tenant.pointsRedeemed30d, 'pointsRedeemed'))}</p>
       </section>
     </div>
   );

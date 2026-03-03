@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getKpiOverview, getKpiTimeseries, KpiOverviewResponse, KpiTimeseriesResponse } from '../lib/adminApi';
+import { formatNumber } from '../lib/formatNumber';
 
 const RANGE_OPTIONS = [7, 30, 90];
 
@@ -11,6 +12,15 @@ interface DashboardData {
 function formatDateTime(value: string | null) {
   if (!value) return '—';
   return new Date(value).toLocaleString();
+}
+
+type MetricsObject = Partial<Record<'stampsIssued' | 'rewardsDelta' | 'pointsEarned' | 'pointsRedeemed', unknown>>;
+
+function readMetricValue(value: unknown, metricKey: keyof MetricsObject): unknown {
+  if (value && typeof value === 'object' && metricKey in value) {
+    return (value as MetricsObject)[metricKey];
+  }
+  return value;
 }
 
 export function DashboardPage() {
@@ -68,15 +78,15 @@ export function DashboardPage() {
 
       {totals && (
         <section className="kpi-grid" style={{ opacity: loading ? 0.7 : 1 }}>
-          <article className="card"><h3>Total tenants</h3><p>{totals.totalTenants}</p></article>
-          <article className="card"><h3>Active subscriptions</h3><p>{totals.activeSubscriptions}</p></article>
-          <article className="card"><h3>Total cards</h3><p>{totals.totalCards}</p></article>
-          <article className="card"><h3>New cards (range)</h3><p>{totals.newCards}</p></article>
-          <article className="card"><h3>Events (range)</h3><p>{totals.events}</p></article>
-          <article className="card"><h3>Stamps issued (range)</h3><p>{totals.stampsIssued}</p></article>
-          <article className="card"><h3>Rewards delta (range)</h3><p>{totals.rewardsDelta}</p></article>
-          <article className="card"><h3>Points earned (range)</h3><p>{totals.pointsEarned}</p></article>
-          <article className="card"><h3>Points redeemed (range)</h3><p>{totals.pointsRedeemed}</p></article>
+          <article className="card"><h3>Total tenants</h3><p>{formatNumber(totals.totalTenants)}</p></article>
+          <article className="card"><h3>Active subscriptions</h3><p>{formatNumber(totals.activeSubscriptions)}</p></article>
+          <article className="card"><h3>Total cards</h3><p>{formatNumber(totals.totalCards)}</p></article>
+          <article className="card"><h3>New cards (range)</h3><p>{formatNumber(totals.newCards)}</p></article>
+          <article className="card"><h3>Events (range)</h3><p>{formatNumber(totals.events)}</p></article>
+          <article className="card"><h3>Stamps issued (range)</h3><p>{formatNumber(readMetricValue(totals.stampsIssued, 'stampsIssued'))}</p></article>
+          <article className="card"><h3>Rewards delta (range)</h3><p>{formatNumber(readMetricValue(totals.rewardsDelta, 'rewardsDelta'))}</p></article>
+          <article className="card"><h3>Points earned (range)</h3><p>{formatNumber(readMetricValue(totals.pointsEarned, 'pointsEarned'))}</p></article>
+          <article className="card"><h3>Points redeemed (range)</h3><p>{formatNumber(readMetricValue(totals.pointsRedeemed, 'pointsRedeemed'))}</p></article>
           <article className="card"><h3>Last event at</h3><p>{formatDateTime(totals.lastEventAt)}</p></article>
         </section>
       )}
@@ -100,10 +110,10 @@ export function DashboardPage() {
               {byDay.map((row) => (
                 <tr key={row.date}>
                   <td>{row.date}</td>
-                  <td>{row.newCards}</td>
-                  <td>{row.events}</td>
-                  <td>{row.stampsIssued}</td>
-                  <td>{row.rewardsDelta}</td>
+                  <td>{formatNumber(row.newCards)}</td>
+                  <td>{formatNumber(row.events)}</td>
+                  <td>{formatNumber(readMetricValue(row.stampsIssued, 'stampsIssued'))}</td>
+                  <td>{formatNumber(readMetricValue(row.rewardsDelta, 'rewardsDelta'))}</td>
                 </tr>
               ))}
             </tbody>

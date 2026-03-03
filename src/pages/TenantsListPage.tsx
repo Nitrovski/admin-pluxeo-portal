@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listTenants, Tenant } from '../lib/adminApi';
+import { formatNumber } from '../lib/formatNumber';
 
 function useDebouncedValue(value: string, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -108,8 +109,8 @@ export function TenantsListPage() {
                     <td>{tenant.merchantId || '—'}</td>
                     <td>{tenant.plan || '—'}</td>
                     <td>{tenant.subscriptionStatus || '—'}</td>
-                    <td>{tenant.cardsCount}</td>
-                    <td>{tenant.events7d}</td>
+                    <td>{formatNumber(tenant.cardsCount)}</td>
+                    <td>{formatNumber(tenant.events7d)}</td>
                     <td>{tenant.lastActivity ? new Date(tenant.lastActivity).toLocaleString() : '—'}</td>
                   </tr>
                 );
