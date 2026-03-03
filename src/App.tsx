@@ -17,12 +17,13 @@ function ProtectedLayout() {
   const [allowed, setAllowed] = useState(false);
   const [denied, setDenied] = useState(false);
   const { impersonation, clearImpersonation, minutesLeft } = useImpersonationContext();
-  const audience = import.meta.env.VITE_ADMIN_CLERK_JWT_AUDIENCE as string | undefined;
+  const audience = (import.meta.env.VITE_ADMIN_CLERK_JWT_AUDIENCE as string | undefined)?.trim();
 
   useEffect(() => {
     setTokenProvider(() => {
-      if (audience && audience.trim()) {
-        return getToken({ audience: audience.trim() });
+      if (audience) {
+        const tokenOptions = ({ audience } as unknown) as Parameters<typeof getToken>[0];
+        return getToken(tokenOptions);
       }
       return getToken();
     });
