@@ -68,11 +68,14 @@ export interface KpiOverviewResponse {
     activeSubscriptions: number;
     totalCards: number;
     newCards: number;
-    events: number;
-    stampsIssued: number;
-    rewardsDelta: number;
-    pointsEarned: number;
-    pointsRedeemed: number;
+    events:
+      | number
+      | {
+          stampsIssued: number;
+          rewardsDelta: number;
+          pointsEarned: number;
+          pointsRedeemed: number;
+        };
     lastEventAt: string | null;
   };
 }
@@ -82,9 +85,12 @@ export interface KpiTimeseriesResponse {
     byDay: Array<{
       date: string;
       newCards: number;
-      events: number;
-      stampsIssued: number;
-      rewardsDelta: number;
+      events:
+        | number
+        | {
+            stampsIssued: number;
+            rewardsDelta: number;
+          };
     }>;
   };
 }

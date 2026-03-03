@@ -14,32 +14,6 @@ function formatDateTime(value: string | null) {
   return new Date(value).toLocaleString();
 }
 
-type MetricsObject = Partial<Record<'stampsIssued' | 'rewardsDelta' | 'pointsEarned' | 'pointsRedeemed', unknown>>;
-
-function readMetricValue(value: unknown, metricKey: keyof MetricsObject): unknown {
-  if (value && typeof value === 'object') {
-    if (metricKey in value) {
-      return (value as MetricsObject)[metricKey];
-    }
-
-    if (import.meta.env.DEV) {
-      console.warn('[DashboardPage] metric object missing expected key', {
-        requestedKey: metricKey,
-        receivedKeys: Object.keys(value),
-        value,
-      });
-    }
-
-    return undefined;
-  }
-
-  return value;
-}
-
-function metric(value: unknown, metricKey: keyof MetricsObject): string {
-  return formatNumber(readMetricValue(value, metricKey));
-}
-
 export function DashboardPage() {
   const [rangeDays, setRangeDays] = useState(30);
   const [loading, setLoading] = useState(true);
@@ -72,6 +46,9 @@ export function DashboardPage() {
   const totals = data?.overview.totals;
   const byDay = data?.timeseries.series.byDay ?? [];
 
+  const totalsEvents = totals && typeof totals.events === 'object' && totals.events !== null ? totals.events : undefined;
+  const totalEventsCount = totals && typeof totals.events === 'number' ? totals.events : undefined;
+
   return (
     <div>
       <div className="header-row">
@@ -99,11 +76,11 @@ export function DashboardPage() {
           <article className="card"><h3>Active subscriptions</h3><p>{formatNumber(totals.activeSubscriptions)}</p></article>
           <article className="card"><h3>Total cards</h3><p>{formatNumber(totals.totalCards)}</p></article>
           <article className="card"><h3>New cards (range)</h3><p>{formatNumber(totals.newCards)}</p></article>
-          <article className="card"><h3>Events (range)</h3><p>{formatNumber(totals.events)}</p></article>
-          <article className="card"><h3>Stamps issued (range)</h3><p>{metric(totals.stampsIssued, 'stampsIssued')}</p></article>
-          <article className="card"><h3>Rewards delta (range)</h3><p>{metric(totals.rewardsDelta, 'rewardsDelta')}</p></article>
-          <article className="card"><h3>Points earned (range)</h3><p>{metric(totals.pointsEarned, 'pointsEarned')}</p></article>
-          <article className="card"><h3>Points redeemed (range)</h3><p>{metric(totals.pointsRedeemed, 'pointsRedeemed')}</p></article>
+          <article className="card"><h3>Events (range)</h3><p>{formatNumber(totalEventsCount)}</p></article>
+          <article className="card"><h3>Stamps issued (range)</h3><p>{formatNumber(totalsEvents?.stampsIssued)}</p></article>
+          <article className="card"><h3>Rewards delta (range)</h3><p>{formatNumber(totalsEvents?.rewardsDelta)}</p></article>
+          <article className="card"><h3>Points earned (range)</h3><p>{formatNumber(totalsEvents?.pointsEarned)}</p></article>
+          <article className="card"><h3>Points redeemed (range)</h3><p>{formatNumber(totalsEvents?.pointsRedeemed)}</p></article>
           <article className="card"><h3>Last event at</h3><p>{formatDateTime(totals.lastEventAt)}</p></article>
         </section>
       )}
@@ -124,15 +101,20 @@ export function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {byDay.map((row) => (
-                <tr key={row.date}>
-                  <td>{row.date}</td>
-                  <td>{formatNumber(row.newCards)}</td>
-                  <td>{formatNumber(row.events)}</td>
-                  <td>{metric(row.stampsIssued, 'stampsIssued')}</td>
-                  <td>{metric(row.rewardsDelta, 'rewardsDelta')}</td>
-                </tr>
-              ))}
+              {byDay.map((row) => {
+                const rowEvents = typeof row.events === 'object' && row.events !== null ? row.events : undefined;
+                const rowEventsCount = typeof row.events === 'number' ? row.events : undefined;
+
+                return (
+                  <tr key={row.date}>
+                    <td>{row.date}</td>
+                    <td>{formatNumber(row.newCards)}</td>
+                    <td>{formatNumber(rowEventsCount)}</td>
+                    <td>{formatNumber(rowEvents?.stampsIssued)}</td>
+                    <td>{formatNumber(rowEvents?.rewardsDelta)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
