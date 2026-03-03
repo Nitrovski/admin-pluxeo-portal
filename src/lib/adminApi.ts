@@ -5,9 +5,7 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL as string;
 if (!API_BASE) {
   throw new Error('Missing VITE_API_BASE_URL');
 }
-const ADMIN_JWT_AUDIENCE = import.meta.env.VITE_ADMIN_CLERK_JWT_AUDIENCE as string | undefined;
-
-type GetToken = (opts?: { audience?: string }) => Promise<string | null>;
+type GetToken = () => Promise<string | null>;
 let tokenProvider: GetToken | null = null;
 
 export function setTokenProvider(provider: GetToken) {
@@ -79,9 +77,7 @@ function createApiError(message: string, status: number): ApiError {
 }
 
 export async function apiFetch<T>(path: string, opts: ApiFetchOptions = {}): Promise<T> {
-  const token = tokenProvider
-    ? await tokenProvider(ADMIN_JWT_AUDIENCE ? { audience: ADMIN_JWT_AUDIENCE } : undefined)
-    : null;
+  const token = tokenProvider ? await tokenProvider() : null;
   const impersonation = loadImpersonation();
 
   const headers: Record<string, string> = {
