@@ -61,6 +61,13 @@ export interface Impersonation {
   targetMerchantId: string;
 }
 
+export interface TenantLoginGrant {
+  token: string;
+  expiresAt: string;
+  targetMerchantId: string;
+  targetCustomerId: string;
+}
+
 
 export interface KpiOverviewResponse {
   totals: {
@@ -200,6 +207,14 @@ export async function stopImpersonation(token: string): Promise<void> {
     method: 'POST',
     body: { token },
   });
+}
+
+export async function createTenantLoginGrant(tenantKey: string): Promise<TenantLoginGrant> {
+  const data = await apiFetch<{ grant: TenantLoginGrant }>('/api/admin/tenant-login', {
+    method: 'POST',
+    body: { tenantKey, customerId: tenantKey },
+  });
+  return data.grant;
 }
 
 
