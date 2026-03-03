@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getTenant, startImpersonation, Tenant } from '../lib/adminApi';
+import { createTenantLoginGrant, getTenant, startImpersonation, Tenant } from '../lib/adminApi';
 import { ImpersonationState } from '../lib/impersonation';
 import { useToast } from '../components/ToastProvider';
 import { formatNumber } from '../lib/formatNumber';
@@ -34,6 +34,7 @@ function readMetricValue(value: unknown, metricKey: keyof MetricsObject): unknow
 export function TenantDetailPage({ onSetImpersonation }: Props) {
   const { customerId: tenantKey = '' } = useParams();
   const { pushToast } = useToast();
+  const merchantAppBaseUrl = (import.meta.env.VITE_MERCHANT_APP_BASE_URL as string) || 'https://merchant.pluxeo.com';
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +93,20 @@ export function TenantDetailPage({ onSetImpersonation }: Props) {
     pushToast('Debug bundle copied');
   };
 
+  const handleOpenTenant = async () => {
+    try {
+      const key = tenant?.customerMongoId || tenantKey;
+      const grant = await createTenantLoginGrant(key);
+      pushToast('Opening tenant...');
+      const base = merchantAppBaseUrl.replace(/\/+$/, '');
+      const url = `${base}/admin-login?grant=${encodeURIComponent(grant.token)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Failed to open tenant';
+      pushToast(message);
+    }
+  };
+
   if (loading) return <p>Loading tenant…</p>;
   if (error) return <p className="error">{error}</p>;
   if (!tenant) return <p>Tenant not found.</p>;
@@ -108,6 +123,7 @@ export function TenantDetailPage({ onSetImpersonation }: Props) {
         </div>
         <div className="actions">
           <button onClick={handleImpersonate}>Impersonate</button>
+          <button onClick={handleOpenTenant}>Open tenant</button>
           <button onClick={handleCopyDebug}>Copy debug bundle</button>
         </div>
       </div>
