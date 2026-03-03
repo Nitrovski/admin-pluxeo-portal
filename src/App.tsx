@@ -106,7 +106,7 @@ export default function App() {
   return (
     <ImpersonationProvider>
       <Routes>
-        <Route path="/sign-in" element={<SignInPage />} />
+        <Route path="/sign-in/*" element={<SignInPage />} />
         <Route element={<AuthBoundary />}>
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
