@@ -64,16 +64,26 @@ export interface Impersonation {
 
 export interface KpiOverviewResponse {
   totals: {
-    totalTenants: number;
-    activeSubscriptions: number;
-    totalCards: number;
-    newCards: number;
-    events: number;
-    stampsIssued: number;
-    rewardsDelta: number;
-    pointsEarned: number;
-    pointsRedeemed: number;
-    lastEventAt: string | null;
+    tenants: {
+      total: number;
+      activeSubscription: number;
+      pastDue: number;
+    };
+    cards: {
+      total: number;
+      newInRange: number;
+      activeInRange: number;
+    };
+    events: {
+      totalInRange: number;
+      stampsIssued: number;
+      rewardsDelta: number;
+      pointsEarned: number;
+      pointsRedeemed: number;
+    };
+    activity: {
+      lastEventAt: string | null;
+    };
   };
 }
 
@@ -82,9 +92,13 @@ export interface KpiTimeseriesResponse {
     byDay: Array<{
       date: string;
       newCards: number;
-      events: number;
-      stampsIssued: number;
-      rewardsDelta: number;
+      events: {
+        totalInRange: number;
+        stampsIssued: number;
+        rewardsDelta: number;
+        pointsEarned: number;
+        pointsRedeemed: number;
+      };
     }>;
   };
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getKpiOverview, getKpiTimeseries, KpiOverviewResponse, KpiTimeseriesResponse } from '../lib/adminApi';
+import { formatNumber } from '../lib/formatNumber';
 
 const RANGE_OPTIONS = [7, 30, 90];
 
@@ -45,6 +46,7 @@ export function DashboardPage() {
   const totals = data?.overview.totals;
   const byDay = data?.timeseries.series.byDay ?? [];
 
+
   return (
     <div>
       <div className="header-row">
@@ -68,16 +70,16 @@ export function DashboardPage() {
 
       {totals && (
         <section className="kpi-grid" style={{ opacity: loading ? 0.7 : 1 }}>
-          <article className="card"><h3>Total tenants</h3><p>{totals.totalTenants}</p></article>
-          <article className="card"><h3>Active subscriptions</h3><p>{totals.activeSubscriptions}</p></article>
-          <article className="card"><h3>Total cards</h3><p>{totals.totalCards}</p></article>
-          <article className="card"><h3>New cards (range)</h3><p>{totals.newCards}</p></article>
-          <article className="card"><h3>Events (range)</h3><p>{totals.events}</p></article>
-          <article className="card"><h3>Stamps issued (range)</h3><p>{totals.stampsIssued}</p></article>
-          <article className="card"><h3>Rewards delta (range)</h3><p>{totals.rewardsDelta}</p></article>
-          <article className="card"><h3>Points earned (range)</h3><p>{totals.pointsEarned}</p></article>
-          <article className="card"><h3>Points redeemed (range)</h3><p>{totals.pointsRedeemed}</p></article>
-          <article className="card"><h3>Last event at</h3><p>{formatDateTime(totals.lastEventAt)}</p></article>
+          <article className="card"><h3>Total tenants</h3><p>{formatNumber(totals.tenants.total)}</p></article>
+          <article className="card"><h3>Active subscriptions</h3><p>{formatNumber(totals.tenants.activeSubscription)}</p></article>
+          <article className="card"><h3>Total cards</h3><p>{formatNumber(totals.cards.total)}</p></article>
+          <article className="card"><h3>New cards (range)</h3><p>{formatNumber(totals.cards.newInRange)}</p></article>
+          <article className="card"><h3>Events (range)</h3><p>{formatNumber(totals.events.totalInRange)}</p></article>
+          <article className="card"><h3>Stamps issued (range)</h3><p>{formatNumber(totals.events.stampsIssued)}</p></article>
+          <article className="card"><h3>Rewards delta (range)</h3><p>{formatNumber(totals.events.rewardsDelta)}</p></article>
+          <article className="card"><h3>Points earned (range)</h3><p>{formatNumber(totals.events.pointsEarned)}</p></article>
+          <article className="card"><h3>Points redeemed (range)</h3><p>{formatNumber(totals.events.pointsRedeemed)}</p></article>
+          <article className="card"><h3>Last event at</h3><p>{formatDateTime(totals.activity.lastEventAt)}</p></article>
         </section>
       )}
 
@@ -100,10 +102,10 @@ export function DashboardPage() {
               {byDay.map((row) => (
                 <tr key={row.date}>
                   <td>{row.date}</td>
-                  <td>{row.newCards}</td>
-                  <td>{row.events}</td>
-                  <td>{row.stampsIssued}</td>
-                  <td>{row.rewardsDelta}</td>
+                  <td>{formatNumber(row.newCards)}</td>
+                  <td>{formatNumber(row.events.totalInRange)}</td>
+                  <td>{formatNumber(row.events.stampsIssued)}</td>
+                  <td>{formatNumber(row.events.rewardsDelta)}</td>
                 </tr>
               ))}
             </tbody>
