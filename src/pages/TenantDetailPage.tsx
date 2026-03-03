@@ -12,9 +12,22 @@ interface Props {
 type MetricsObject = Partial<Record<'stampsIssued' | 'rewardsDelta' | 'pointsEarned' | 'pointsRedeemed', unknown>>;
 
 function readMetricValue(value: unknown, metricKey: keyof MetricsObject): unknown {
-  if (value && typeof value === 'object' && metricKey in value) {
-    return (value as MetricsObject)[metricKey];
+  if (value && typeof value === 'object') {
+    if (metricKey in value) {
+      return (value as MetricsObject)[metricKey];
+    }
+
+    if (import.meta.env.DEV) {
+      console.warn('[TenantDetailPage] metric object missing expected key', {
+        requestedKey: metricKey,
+        receivedKeys: Object.keys(value),
+        value,
+      });
+    }
+
+    return undefined;
   }
+
   return value;
 }
 

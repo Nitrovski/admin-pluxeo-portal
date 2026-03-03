@@ -17,10 +17,27 @@ function formatDateTime(value: string | null) {
 type MetricsObject = Partial<Record<'stampsIssued' | 'rewardsDelta' | 'pointsEarned' | 'pointsRedeemed', unknown>>;
 
 function readMetricValue(value: unknown, metricKey: keyof MetricsObject): unknown {
-  if (value && typeof value === 'object' && metricKey in value) {
-    return (value as MetricsObject)[metricKey];
+  if (value && typeof value === 'object') {
+    if (metricKey in value) {
+      return (value as MetricsObject)[metricKey];
+    }
+
+    if (import.meta.env.DEV) {
+      console.warn('[DashboardPage] metric object missing expected key', {
+        requestedKey: metricKey,
+        receivedKeys: Object.keys(value),
+        value,
+      });
+    }
+
+    return undefined;
   }
+
   return value;
+}
+
+function metric(value: unknown, metricKey: keyof MetricsObject): string {
+  return formatNumber(readMetricValue(value, metricKey));
 }
 
 export function DashboardPage() {
@@ -83,10 +100,10 @@ export function DashboardPage() {
           <article className="card"><h3>Total cards</h3><p>{formatNumber(totals.totalCards)}</p></article>
           <article className="card"><h3>New cards (range)</h3><p>{formatNumber(totals.newCards)}</p></article>
           <article className="card"><h3>Events (range)</h3><p>{formatNumber(totals.events)}</p></article>
-          <article className="card"><h3>Stamps issued (range)</h3><p>{formatNumber(readMetricValue(totals.stampsIssued, 'stampsIssued'))}</p></article>
-          <article className="card"><h3>Rewards delta (range)</h3><p>{formatNumber(readMetricValue(totals.rewardsDelta, 'rewardsDelta'))}</p></article>
-          <article className="card"><h3>Points earned (range)</h3><p>{formatNumber(readMetricValue(totals.pointsEarned, 'pointsEarned'))}</p></article>
-          <article className="card"><h3>Points redeemed (range)</h3><p>{formatNumber(readMetricValue(totals.pointsRedeemed, 'pointsRedeemed'))}</p></article>
+          <article className="card"><h3>Stamps issued (range)</h3><p>{metric(totals.stampsIssued, 'stampsIssued')}</p></article>
+          <article className="card"><h3>Rewards delta (range)</h3><p>{metric(totals.rewardsDelta, 'rewardsDelta')}</p></article>
+          <article className="card"><h3>Points earned (range)</h3><p>{metric(totals.pointsEarned, 'pointsEarned')}</p></article>
+          <article className="card"><h3>Points redeemed (range)</h3><p>{metric(totals.pointsRedeemed, 'pointsRedeemed')}</p></article>
           <article className="card"><h3>Last event at</h3><p>{formatDateTime(totals.lastEventAt)}</p></article>
         </section>
       )}
@@ -112,8 +129,8 @@ export function DashboardPage() {
                   <td>{row.date}</td>
                   <td>{formatNumber(row.newCards)}</td>
                   <td>{formatNumber(row.events)}</td>
-                  <td>{formatNumber(readMetricValue(row.stampsIssued, 'stampsIssued'))}</td>
-                  <td>{formatNumber(readMetricValue(row.rewardsDelta, 'rewardsDelta'))}</td>
+                  <td>{metric(row.stampsIssued, 'stampsIssued')}</td>
+                  <td>{metric(row.rewardsDelta, 'rewardsDelta')}</td>
                 </tr>
               ))}
             </tbody>
